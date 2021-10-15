@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project_template/common/utils/permission/permission_manager.dart';
 import 'package:flutter_project_template/common/utils/viewmodel/viewmodel_provider.dart';
 import 'package:flutter_project_template/common/widget/my_button.dart';
-import 'package:flutter_project_template/config/main/env/my_home_page.dart';
 import 'package:flutter_project_template/router/routers.dart';
 
 import 'home/home_page01.dart';
@@ -98,11 +97,12 @@ class _TestRouterState extends State<TestRouter> {
               child: MyButton(
                 textContent: '返回登录页面',
                 onTap: () {
-                  Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const MyHomePage()),
-                      ModalRoute.withName('')); //不要写 null
+                  Navigator.popUntil(context, ModalRoute.withName('/'));
+                  // Navigator.pushAndRemoveUntil(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //         builder: (context) => const MyHomePage()),
+                  //     ModalRoute.withName('')); //不要写 null
                 },
               ),
             ),
