@@ -32,7 +32,7 @@ class Env {
 
     /// FlutterBugly 异常上报
     FlutterBugly.postCatchedException(
-      () => runApp(const MyApp()),
+          () => runApp(const MyApp()),
     );
 
     FlutterBugly.init(androidAppId: '9fc97cfef9', iOSAppId: '47388b8383');
@@ -67,7 +67,12 @@ class MyApp extends StatelessWidget {
             /** ===============国际化end================ */
             debugShowCheckedModeBanner: false,
             title: Development.appName ?? "Flutter App",
-            theme: ThemeData(primarySwatch: Colors.blue),
+
+            /** 字体 全局使用 */
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+              fontFamily: 'AndadaPro',
+            ),
             navigatorKey: navigatorKey,
             navigatorObservers: [NavigationHistoryObserver()], // 记录栈中的路由
             home: const MyHomePage(),

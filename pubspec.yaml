@@ -103,5 +103,17 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+  #  weight属性指定字体的粗细，取值范围是100到900之间的整百数(100的倍数).
+  #  这些值对应 FontWeight， 可以用于 TextStyle的fontWeight属性
+  fonts:
+    - family: AndadaPro
+      fonts:
+        - asset: assets/fonts/AndadaPro-Regular.ttf
+        - asset: assets/fonts/AndadaPro-SemiBold.ttf
+          weight: 600
+uses-material-design: true
+#  material风格
+
 flutter_intl:
   enabled: true

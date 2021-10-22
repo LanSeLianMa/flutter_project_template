@@ -50,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
               alignment: Alignment.center,
               child: Text(
                 '测试：flutter_screenutil',
-                style: TextStyle(fontSize: 16.sp),
+                style: TextStyle(fontSize: 16.sp,fontWeight: FontWeight.w600),
               ),
             ),
             Container(
