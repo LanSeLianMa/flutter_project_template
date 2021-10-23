@@ -11,6 +11,7 @@ import 'package:flutter_project_template/config/main/env/development.dart';
 import 'package:flutter_project_template/config/main/env/env.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:navigation_history_observer/navigation_history_observer.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 ///获取全局context
 BuildContext context = navigatorKey!.currentState!.overlay!.context;
@@ -20,6 +21,9 @@ String logBaseUrl = '';
 
 /// 接口
 String logBaseApi = '';
+
+/// 是否显示加载组件
+bool loadingFlag = false;
 
 /// 请求管理器
 class HttpManager {
@@ -45,6 +49,9 @@ class HttpManager {
 
   /// 如果已经存在实例，从缓存中返回原有的实例，反之重新创建，并返回
   static _getInstance() => _instance ??= HttpManager.http();
+
+  /// 刷新或加载更多 控制器
+  RefreshController? _controller;
 
   /// 初始化
   /// 通过Dio提供BaseOptions对象，创建Dio实例
@@ -73,15 +80,30 @@ class HttpManager {
         options.headers['Authorization'] = 'Bearer ${token.accessToken}';
         handler.next(options);
       }, onError: (e, handler) {
-        closeLoadingWidget(true);
+        closeLoadingWidget();
+        failed();
         getNetWork(e);
         handler.next(e);
       }))
       ..interceptors.add(RequestLog());
   }
 
+  /// 刷新或加载更多 失败
+  failed() {
+    if(_controller != null){
+      if (_controller!.isRefresh) {
+        _controller!.refreshFailed();
+      }
+
+      if (_controller!.isLoading) {
+        _controller!.loadFailed();
+      }
+    }
+  }
+
   /// 请求
   Future<void> request({
+    RefreshController? refreshController, // 下拉刷新，下拉加载控制器
     CancelToken? cancelToken, // 取消请求
     bool initData = false,
     String? updateBaseUrl, // 域名
@@ -94,7 +116,7 @@ class HttpManager {
   }) async {
     Response response;
     logBaseApi = api;
-
+    _controller = refreshController;
     // 是否更改 接口域名
     if (updateBaseUrl != null) {
       logBaseUrl = updateBaseUrl;
@@ -109,6 +131,7 @@ class HttpManager {
       // 绘制view第一帧之后回调
       WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
         loadingWidget();
+        loadingFlag = true;
       });
     }
 
@@ -123,7 +146,7 @@ class HttpManager {
               cancelToken: cancelToken,
             )
             .catchError((err) {
-          closeLoadingWidget(initData);
+          closeLoadingWidget();
           errorCallback!.call(err);
         });
         break;
@@ -136,7 +159,7 @@ class HttpManager {
               cancelToken: cancelToken,
             )
             .catchError((err) {
-          closeLoadingWidget(initData);
+          closeLoadingWidget();
           errorCallback!.call(err);
         });
         break;
@@ -149,7 +172,7 @@ class HttpManager {
               cancelToken: cancelToken,
             )
             .catchError((err) {
-          closeLoadingWidget(initData);
+          closeLoadingWidget();
           errorCallback!.call(err);
         });
         break;
@@ -162,17 +185,17 @@ class HttpManager {
               cancelToken: cancelToken,
             )
             .catchError((err) {
-          closeLoadingWidget(initData);
+          closeLoadingWidget();
           errorCallback!.call(err);
         });
         break;
     }
 
     if (response.statusCode == HttpStatus.ok) {
-      closeLoadingWidget(initData);
+      closeLoadingWidget();
       successCallback!.call(response);
     } else {
-      closeLoadingWidget(initData);
+      closeLoadingWidget();
       failCallback!.call(response);
     }
   }
@@ -213,11 +236,14 @@ toastErrInfo(DioError error) {
 }
 
 /// 关闭加载loading组件
-closeLoadingWidget(bool initData) {
-  if (initData) {
+closeLoadingWidget() {
+
+  if (loadingFlag) {
     // 判断栈中是否还有路由
     if (NavigationHistoryObserver().history.isNotEmpty) {
+      print('触发了:POP');
       Navigator.of(context).pop();
+      loadingFlag = false;
     }
   }
 }

@@ -1,11 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_project_template/common/http/http_manager.dart';
+import 'package:flutter_project_template/common/observer/observer.dart';
+import 'package:flutter_project_template/common/observer/subject.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../function/my_function.dart' show dataHandler;
 
 /// 刷新/加载更多 基础视图
-class RefreshLoadBaseView implements OnClosed {
+class RefreshLoadBaseView implements OnClosed{
+
   /// 分页数
   int page = 1;
 
@@ -87,6 +90,7 @@ class RefreshLoadBaseView implements OnClosed {
     updatePage();
 
     await HttpManager().request(
+        refreshController: refreshController,
         cancelToken: parameter!.cancelToken,
         initData: initData,
         updateBaseUrl: parameter!.updateBaseUrl,
@@ -123,6 +127,7 @@ class RefreshLoadBaseView implements OnClosed {
     print('==============');
     refreshController?.dispose();
   }
+
 }
 
 /// 销毁接口

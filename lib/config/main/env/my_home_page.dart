@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_project_template/common/widget/my_button.dart';
 import 'package:flutter_project_template/generated/l10n.dart';
 import 'package:flutter_project_template/page/login.dart';
+import 'package:flutter_project_template/page/root_view.dart';
 import 'package:flutter_project_template/page/test_bugly.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -62,6 +63,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 '测试：flutter_screenutil',
                 style: TextStyle(fontSize: 16.sp),
               ),
+            ),
+            MyButton(
+              textContent: '底部导航',
+              onTap: () {
+                Navigator.push<void>(
+                  context,
+                  MaterialPageRoute<void>(
+                    builder: (BuildContext context) => const RootView(),
+                  ),
+                );
+              },
             ),
           ],
         ),

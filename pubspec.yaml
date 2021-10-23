@@ -48,6 +48,7 @@ dependencies:
   connectivity_plus: ^1.1.0 # 监听网络变化
   permission_handler: ^8.1.6 # 权限管理
   flutter_bugly: ^0.3.3
+  provider: ^6.0.1
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +75,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/login/
+    - assets/images/home_tabBar_icon/
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg

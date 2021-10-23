@@ -7,6 +7,7 @@ import 'package:flutter_project_template/page/home/home_page01.dart';
 import 'package:flutter_project_template/page/home/home_page02.dart';
 import 'package:flutter_project_template/page/order/order_page01.dart';
 import 'package:flutter_project_template/page/order/order_page02.dart';
+import 'package:flutter_project_template/page/root_view.dart';
 
 import 'application.dart';
 
@@ -26,7 +27,7 @@ class Routers {
 
     // 根路由
     router.define('/',
-        handler: Handler(handlerFunc: (_, __) => const MyHomePage()));
+        handler: Handler(handlerFunc: (_, __) => const RootView()));
 
     // 初始化各个模块的路由
     homeRoutes();

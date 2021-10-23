@@ -266,6 +266,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.1.0"
+  nested:
+    dependency: transitive
+    description:
+      name: nested
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.0.0"
   nm:
     dependency: transitive
     description:
@@ -364,6 +371,13 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "4.2.3"
+  provider:
+    dependency: "direct main"
+    description:
+      name: provider
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "6.0.1"
   pull_to_refresh:
     dependency: "direct main"
     description:
