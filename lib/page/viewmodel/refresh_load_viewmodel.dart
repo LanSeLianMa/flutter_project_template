@@ -1,5 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_project_template/common/event/event_bus.dart';
+import 'package:flutter_project_template/common/http/http_err_model.dart';
 import 'package:flutter_project_template/common/utils/list/refresh_load_base_view.dart';
 import 'package:flutter_project_template/common/utils/stream/h_stream.dart';
 import 'package:flutter_project_template/common/utils/viewmodel/base_view_model.dart';
@@ -15,6 +18,31 @@ class RefreshLoadModel extends BaseViewModel with RefreshLoadBaseView {
 
   HStream<MusicModelList>? get musicModelList => _musicModelList;
   HStream<int>? get currentPage => _currentPage;
+  HStream<HttpErrModel>? get errModel => _errModel;
+
+  var actionEventBus;
+  HStream<HttpErrModel> _errModel = HStream<HttpErrModel>(initialData: HttpErrModel());
+
+  bool initFlag = true;
+
+  @override
+  Future doInit(BuildContext context, bool mounted) async {
+
+    /// view第一帧之后回调，大概是延迟20毫秒左右
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) {
+      // 注册监听器
+      actionEventBus = eventBus.on<HttpErr>().listen((event) {
+        if(event.errorType != null && initFlag){
+          _errModel.update(HttpErrModel(errorType: event.errorType, errFlag: true));
+        }else {
+          _errModel.update(HttpErrModel(errFlag: false));
+          initFlag = false;
+        }
+      });
+    });
+    refreshData(context, mounted);
+
+  }
 
   @override
   void dispose(BuildContext context, bool mounted) {
@@ -28,15 +56,14 @@ class RefreshLoadModel extends BaseViewModel with RefreshLoadBaseView {
     print('==============');
     print('销毁了');
     print('==============');
+    _errModel.onDispose();
+    actionEventBus!.cancel();
     _musicModelList!.onDispose();
     _currentPage!.onDispose();
-    cancelToken!.cancel();
+    if(!cancelToken!.isCancelled){
+      cancelToken!.cancel();
+    }
     super.onClose();
-  }
-
-  @override
-  Future doInit(BuildContext context, bool mounted) async {
-    refreshData(context, mounted);
   }
 
   @override

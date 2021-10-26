@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_project_template/common/http/http_err_model.dart';
 import 'package:flutter_project_template/common/utils/stream/h_stream_builder.dart';
+import 'package:flutter_project_template/common/utils/viewmodel/base_view.dart';
 import 'package:flutter_project_template/common/utils/viewmodel/viewmodel_provider.dart';
 import 'package:flutter_project_template/common/widget/data_null_widget.dart';
 import 'package:flutter_project_template/model/music_model.dart';
@@ -8,15 +10,19 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 /// 下拉刷新，上拉加载更多
 /// 当前属于MVVM中的 View层
-class ListRefreshLoad extends StatefulWidget {
-  const ListRefreshLoad({Key? key}) : super(key: key);
+class ListRefreshLoad extends BaseView {
+  ListRefreshLoad({Key? key}) : super(key: key);
+
+  /// 是否自动创建 AppBar
+  bool get automaticallyImplyAppBar => false;
 
   @override
-  _ListRefreshLoadState createState() => _ListRefreshLoadState();
+  State<StatefulWidget> createState() => ListRefreshLoadState();
+
 }
 
 /// MVVM设计模式
-class _ListRefreshLoadState extends State<ListRefreshLoad> {
+class ListRefreshLoadState extends BaseViewState<ListRefreshLoad> {
   RefreshLoadModel? _refreshLoadModel;
 
   @override
@@ -33,10 +39,18 @@ class _ListRefreshLoadState extends State<ListRefreshLoad> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-        color: Colors.white,
-        child: Scaffold(
+  Widget buildPage(BuildContext context) {
+    return HStreamBuilder<HttpErrModel>(
+        hStream: _refreshLoadModel!.errModel,
+        builder: (context, errModel) {
+          if (errModel.data!.errFlag == true) {
+            return DataNullWidget(
+              msg: errModel.data!.errorType.toString(),
+                callback: () {
+              _refreshLoadModel!.requestListApi(initData: true);
+            });
+          }
+        return Scaffold(
             appBar: AppBar(
               centerTitle: true,
               title: HStreamBuilder<int>(
@@ -48,13 +62,13 @@ class _ListRefreshLoadState extends State<ListRefreshLoad> {
             body: HStreamBuilder<MusicModelList>(
                 hStream: _refreshLoadModel!.musicModelList,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.active) {
-                    if (snapshot.data?.musicModels?.isEmpty ?? false) {
-                      return DataNullWidget(callback: () {
-                        _refreshLoadModel!.requestListApi(initData: true);
-                      });
-                    }
-                  }
+//              if (snapshot.connectionState == ConnectionState.active) {
+//                if (snapshot.data?.musicModels?.isEmpty ?? false) {
+//                  return DataNullWidget(callback: () {
+//                    _refreshLoadModel!.requestListApi(initData: true);
+//                  });
+//                }
+//              }
                   return SmartRefresher(
                     // 下拉刷新
                     enablePullDown: true,
@@ -75,7 +89,9 @@ class _ListRefreshLoadState extends State<ListRefreshLoad> {
                                   '${snapshot.data?.musicModels![index]?.title}'));
                         }),
                   );
-                })));
+                }));
+      }
+    );
   }
 }
 

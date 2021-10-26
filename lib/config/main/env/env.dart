@@ -1,8 +1,12 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bugly/flutter_bugly.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_project_template/common/hiv/hiv_manager.dart';
 import 'package:flutter_project_template/common/provider/index_provider.dart';
+import 'package:flutter_project_template/common/utils/network/connectivity_status.dart';
 import 'package:flutter_project_template/common/widget/error_widget.dart';
 import 'package:flutter_project_template/config/main/env/development.dart';
 import 'package:flutter_project_template/generated/l10n.dart';
@@ -13,6 +17,7 @@ import 'package:navigation_history_observer/navigation_history_observer.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
+import 'app_store.dart';
 import 'my_home_page.dart';
 
 /// 测试环境
@@ -47,14 +52,48 @@ class Env {
 final GlobalKey<NavigatorState>? navigatorKey = GlobalKey<NavigatorState>();
 
 /// App初始化配置
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  State<MyApp> createState() => _MyAppState();
+}
 
+class _MyAppState extends State<MyApp> {
+
+  final AppStore _appStore = AppStore();
+
+  late StreamSubscription _subscription;
+
+  @override
+  void initState() {
+    super.initState();
+    initConnectivityListener();
+
+  }
+
+  void initConnectivityListener() async {
+    var connectivity = Connectivity();
+    _subscription =
+        connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
+          _appStore.connectivityStatus.onConnectivityChanged(result);
+        });
+    var result = await connectivity.checkConnectivity();
+    _appStore.connectivityStatus.onConnectivityChanged(result);
+  }
+
+  @override
+  void dispose() {
+    _appStore.onDispose();
+    _subscription.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider<ConnectivityStatus>.value(value: _appStore.connectivityStatus),
         ChangeNotifierProvider(create: (_) => IndexProvider()),
       ],
       child: ScreenUtilInit(

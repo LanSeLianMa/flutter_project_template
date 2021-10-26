@@ -49,6 +49,7 @@ dependencies:
   permission_handler: ^8.1.6 # 权限管理
   flutter_bugly: ^0.3.3
   provider: ^6.0.1
+  event_bus: ^2.0.0
 
 dev_dependencies:
   flutter_test:

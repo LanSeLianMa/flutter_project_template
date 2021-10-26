@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_project_template/common/event/event_bus.dart';
 import 'package:flutter_project_template/common/hiv/hiv_manager.dart';
 import 'package:flutter_project_template/common/hiv/hiv_name.dart';
 import 'package:flutter_project_template/common/token/token_model.dart';
@@ -34,13 +35,13 @@ class HttpManager {
   Dio? _dio;
 
   /// 连接请求最大时长，单位毫秒
-  static const int? connectTimeout = 10000;
+  static const int? connectTimeout = 5000;
 
   /// 接收请求最大时长，单位毫秒
-  static const int? receiveTimeout = 10000;
+  static const int? receiveTimeout = 5000;
 
   /// 发送请求最大时长，单位毫秒
-  static const int? sendTimeout = 10000;
+  static const int? sendTimeout = 5000;
 
   Dio? get http => _dio;
 
@@ -80,9 +81,15 @@ class HttpManager {
         options.headers['Authorization'] = 'Bearer ${token.accessToken}';
         handler.next(options);
       }, onError: (e, handler) {
+        /// 事件广播
+        eventBus.fire(HttpErr(errorType: e.type));
         closeLoadingWidget();
         failed();
-        getNetWork(e);
+        toastErrInfo(e);
+        handler.next(e);
+      },onResponse:(e,handler){
+        /// 事件广播
+        eventBus.fire(HttpErr(errorType: null));
         handler.next(e);
       }))
       ..interceptors.add(RequestLog());
@@ -111,8 +118,6 @@ class HttpManager {
     Map<String, dynamic>? parameter, // 参数
     RequestType type = RequestType.get, // 请求类型
     Function(Response result)? successCallback, // code码 200 回调
-    Function(Response result)? failCallback, // code码 非200 回调
-    Function(Object err)? errorCallback, // 异常回调
   }) async {
     Response response;
     logBaseApi = api;
@@ -144,11 +149,7 @@ class HttpManager {
               api,
               queryParameters: parameter,
               cancelToken: cancelToken,
-            )
-            .catchError((err) {
-          closeLoadingWidget();
-          errorCallback!.call(err);
-        });
+            );
         break;
       case RequestType.post:
         response = await HttpManager()
@@ -157,11 +158,7 @@ class HttpManager {
               api,
               queryParameters: parameter,
               cancelToken: cancelToken,
-            )
-            .catchError((err) {
-          closeLoadingWidget();
-          errorCallback!.call(err);
-        });
+        );
         break;
       case RequestType.put:
         response = await HttpManager()
@@ -170,11 +167,7 @@ class HttpManager {
               api,
               queryParameters: parameter,
               cancelToken: cancelToken,
-            )
-            .catchError((err) {
-          closeLoadingWidget();
-          errorCallback!.call(err);
-        });
+        );
         break;
       case RequestType.delete:
         response = await HttpManager()
@@ -183,11 +176,7 @@ class HttpManager {
               api,
               queryParameters: parameter,
               cancelToken: cancelToken,
-            )
-            .catchError((err) {
-          closeLoadingWidget();
-          errorCallback!.call(err);
-        });
+        );
         break;
     }
 
@@ -195,19 +184,10 @@ class HttpManager {
       closeLoadingWidget();
       successCallback!.call(response);
     } else {
+      failed();
       closeLoadingWidget();
-      failCallback!.call(response);
     }
-  }
-}
 
-/// 监听网络
-getNetWork(DioError error) async {
-  var connectivityResult = await (Connectivity().checkConnectivity());
-  if (connectivityResult == ConnectivityResult.none) {
-    Fluttertoast.showToast(msg: '网络异常');
-  } else {
-    toastErrInfo(error);
   }
 }
 

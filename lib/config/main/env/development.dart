@@ -2,7 +2,7 @@ import 'env.dart';
 
 /// 启用开发环境
 class Development extends Env {
-  /** ================= 全局变量 ================= */
+  /** ================= 全局常量 ================= */
   /// app名称
   static const String? appName = 'app名称';
 

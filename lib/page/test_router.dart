@@ -87,7 +87,7 @@ class _TestRouterState extends State<TestRouter> {
                   Routers.push(
                     ViewModelProvider.path,
                     context,
-                    parameter: {'widget': const ListRefreshLoad()},
+                    parameter: {'widget': ListRefreshLoad()},
                   );
                 },
               ),

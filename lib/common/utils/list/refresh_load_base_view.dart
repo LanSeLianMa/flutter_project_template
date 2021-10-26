@@ -74,17 +74,6 @@ class RefreshLoadBaseView implements OnClosed{
     callback.call(true, false);
   }
 
-  /// 刷新或加载更多 失败
-  failed() {
-    if (refreshController!.isRefresh) {
-      refreshController!.refreshFailed();
-    }
-
-    if (refreshController!.isLoading) {
-      refreshController!.loadFailed();
-    }
-  }
-
   /// 请求列表接口
   requestListApi({bool initData = false}) async {
     updatePage();
@@ -111,12 +100,7 @@ class RefreshLoadBaseView implements OnClosed{
                 }
               });
         },
-        failCallback: (result) {
-          failed();
-        },
-        errorCallback: (err) {
-          failed();
-        });
+        );
   }
 
   /// 销毁Controller
